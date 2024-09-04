@@ -1,18 +1,22 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
-# Defina a URL de conexão para o seu banco de dados
-SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+DATABASE_URL = "sqlite:///mydatabase.db"
 
-# Crie o engine SQLAlchemy
-engine = create_engine(SQLALCHEMY_DATABASE_URI)
-
-# Crie uma fábrica de sessões
+engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def check_tables():
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT name FROM sqlite_master WHERE type='table';"))
+        tables = result.fetchall()
+        print("Tables in database:", [table[0] for table in tables])
+
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+    print("Database tables created.")
+    check_tables()
+

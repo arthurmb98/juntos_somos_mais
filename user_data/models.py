@@ -1,34 +1,23 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from django.db import models
 
-Base = declarative_base()
-
-class User(Base):
-    __tablename__ = 'user_data'
-
-    id = Column(Integer, primary_key=True, index=True)
-    gender = Column(String(10))
-    title = Column(String(10))
-    first_name = Column(String(100))
-    last_name = Column(String(100))
-    street = Column(String(255))
-    city = Column(String(100))
-    state = Column(String(100))
-    postcode = Column(String(10))
-    latitude = Column(Float)
-    longitude = Column(Float)
-    timezone_offset = Column(String(10))
-    timezone_description = Column(String(100))
-    email = Column(String(255))
-    dob_date = Column(DateTime)
-    dob_age = Column(Integer)
-    registered_date = Column(DateTime)
-    registered_age = Column(Integer)
-    phone = Column(String(20))
-    cell = Column(String(20))
-    picture_large = Column(String(255))
-    picture_medium = Column(String(255))
-    picture_thumbnail = Column(String(255))
-
-    def __repr__(self):
-        return f"<User(first_name={self.first_name}, last_name={self.last_name})>"
+class User(models.Model):
+    gender = models.CharField(max_length=10)
+    title = models.CharField(max_length=10)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    street = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    postcode = models.CharField(max_length=10)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    timezone_offset = models.CharField(max_length=10)
+    timezone_description = models.CharField(max_length=100)
+    email = models.EmailField(max_length=255)
+    birthday = models.DateTimeField()
+    registered = models.DateTimeField()
+    phone = models.CharField(max_length=20)
+    cell = models.CharField(max_length=20)
+    picture_large = models.URLField(max_length=255)
+    picture_medium = models.URLField(max_length=255)
+    picture_thumbnail = models.URLField(max_length=255)

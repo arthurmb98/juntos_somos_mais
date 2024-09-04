@@ -1,0 +1,19 @@
+# Ambiente virtual
+juntos_somos_mais_env/Lib/
+
+# Arquivos de configuração do IDE
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Arquivos de cache
+*.log
+*.tmp
+*.bak
+
+# Outros arquivos e pastas ignorados
+*.DS_Store
+*.env

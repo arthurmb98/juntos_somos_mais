@@ -1,65 +1,72 @@
-import pandas as pd
+import csv
 import json
-from .models import User
+import requests
+from io import StringIO
+import pandas as pd
 
-def process_csv(file):
-    df = pd.read_csv(file)
-    for _, row in df.iterrows():
-        User.objects.create(
-            type=determine_type(row['longitude'], row['latitude']),
-            gender='M' if row['gender'] == 'male' else 'F',
-            name_title=row['name.title'],
-            name_first=row['name.first'],
-            name_last=row['name.last'],
-            street=row['location.street'],
-            city=row['location.city'],
-            state=row['location.state'],
-            postcode=row['location.postcode'],
-            latitude=row['location.coordinates.latitude'],
-            longitude=row['location.coordinates.longitude'],
-            timezone_offset=row['location.timezone.offset'],
-            timezone_description=row['location.timezone.description'],
-            email=row['email'],
-            birthday=row['dob.date'],
-            registered=row['registered.date'],
-            telephone_numbers=[convert_to_e164(row['phone'])],
-            mobile_numbers=[convert_to_e164(row['cell'])],
-            picture_large=row['picture.large'],
-            picture_medium=row['picture.medium'],
-            picture_thumbnail=row['picture.thumbnail'],
-        )
+def download_file(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.content
 
-def process_json(file):
-    data = json.load(file)
-    for entry in data:
-        User.objects.create(
-            type=determine_type(entry['location']['coordinates']['longitude'], entry['location']['coordinates']['latitude']),
-            gender='M' if entry['gender'] == 'male' else 'F',
-            name_title=entry['name']['title'],
-            name_first=entry['name']['first'],
-            name_last=entry['name']['last'],
-            street=entry['location']['street'],
-            city=entry['location']['city'],
-            state=entry['location']['state'],
-            postcode=entry['location']['postcode'],
-            latitude=entry['location']['coordinates']['latitude'],
-            longitude=entry['location']['coordinates']['longitude'],
-            timezone_offset=entry['location']['timezone']['offset'],
-            timezone_description=entry['location']['timezone']['description'],
-            email=entry['email'],
-            birthday=entry['dob']['date'],
-            registered=entry['registered']['date'],
-            telephone_numbers=[convert_to_e164(entry['phone'])],
-            mobile_numbers=[convert_to_e164(entry['cell'])],
-            picture_large=entry['picture']['large'],
-            picture_medium=entry['picture']['medium'],
-            picture_thumbnail=entry['picture']['thumbnail'],
-        )
+def read_csv(content):
+    content_str = content.decode('utf-8')
+    csv_reader = csv.DictReader(StringIO(content_str))
+    return list(csv_reader)
 
-def convert_to_e164(phone_number):
-    # Implement conversion logic
-    return phone_number
+def read_json(content):
+    return json.loads(content)
 
-def determine_type(longitude, latitude):
-    # Implement classification logic
-    return 'traballhoso'
+def transform_json_data(json_content):
+    # Acesse a lista de resultados dentro do JSON
+    json_content = json_content.get("results", [])
+    
+    if not isinstance(json_content, list):
+        raise ValueError("O conteúdo JSON deve ser uma lista de objetos (dicionários).")
+    
+    transformed_data = []
+
+    for item in json_content:
+        if not isinstance(item, dict):
+            raise ValueError(f"Esperado um dicionário, mas recebeu {type(item)}: {item}")
+
+        transformed_item = {
+            "gender": item.get('gender', '').strip().lower(),
+            "name": {
+                "title": item.get('name', {}).get('title', '').strip(),
+                "first": item.get('name', {}).get('first', '').strip(),
+                "last": item.get('name', {}).get('last', '').strip()
+            },
+            "location": {
+                "street": item.get('location', {}).get('street', '').strip(),
+                "city": item.get('location', {}).get('city', '').strip(),
+                "state": item.get('location', {}).get('state', '').strip(),
+                "postcode": item.get('location', {}).get('postcode', 0),  # Convert to integer
+                "coordinates": {
+                    "latitude": item.get('location', {}).get('coordinates', {}).get('latitude', '').strip(),
+                    "longitude": item.get('location', {}).get('coordinates', {}).get('longitude', '').strip()
+                },
+                "timezone": {
+                    "offset": item.get('location', {}).get('timezone', {}).get('offset', '').strip(),
+                    "description": item.get('location', {}).get('timezone', {}).get('description', '').strip()
+                }
+            },
+            "email": item.get('email', '').strip(),
+            "birthday": item.get('dob', {}).get('date', '').strip(),
+            "registered": item.get('registered', {}).get('date', '').strip(),
+            "telephoneNumbers": [item.get('phone', '').strip()],
+            "mobileNumbers": [item.get('cell', '').strip()],
+            "picture": {
+                "large": item.get('picture', {}).get('large', '').strip(),
+                "medium": item.get('picture', {}).get('medium', '').strip(),
+                "thumbnail": item.get('picture', {}).get('thumbnail', '').strip()
+            },
+            "nationality": "BR"
+        }
+        transformed_data.append(transformed_item)
+    
+    return transformed_data
+
+
+
+
