@@ -29,19 +29,23 @@ Cria um novo usuário. O corpo da solicitação deve conter os dados do usuário
 
 ### `POST /api/populate_database/`
 
-Popula o banco de dados a partir dos arquivos CSV e JSON.
+Popula o banco de dados a partir dos arquivos CSV e JSON estáticos.
 
 ### `POST /api/populate_csv/`
 
-Popula o banco de dados a partir do arquivo CSV.
+Popula o banco de dados a partir do arquivo CSV estático.
 
 ### `POST /api/populate_json/`
 
-Popula o banco de dados a partir do arquivo JSON.
+Popula o banco de dados a partir do arquivo JSON estático.
 
 ### `GET /api/purge_users/`
 
 Expurga todos os dados de usuários.
+
+### `POST /api/users/create`
+
+Popula o banco de dados a partir de um arquivo CSV ou JSON no 'body' do request.
 
 ## Instalação
 

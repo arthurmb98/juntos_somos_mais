@@ -17,3 +17,7 @@ juntos_somos_mais_env/Lib/
 # Outros arquivos e pastas ignorados
 *.DS_Store
 *.env
+
+# Ignorar o arquivo do banco de dados
+mydatabase.db
+db.sqlite3
