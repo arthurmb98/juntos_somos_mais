@@ -25,7 +25,7 @@ Lista os usuários filtrados por tipo com paginação. Parâmetros:
 
 ### `POST /api/users/create`
 
-Cria um novo usuário. O corpo da solicitação deve conter os link do arquivo JSON ou CSV.
+Cria novos usuários. O corpo da solicitação deve conter o link do arquivo JSON ou CSV.
 - `body`: { "file_url": "https://url/file.json" } (obrigatório)
 
 ### `POST /api/populate_database/`
