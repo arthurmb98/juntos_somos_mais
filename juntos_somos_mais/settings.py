@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'user_data',  # Referência ao seu app Django
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
