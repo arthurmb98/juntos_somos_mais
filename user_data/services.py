@@ -63,10 +63,13 @@ class UserService:
         longitude = float(user.longitude) if user.longitude else None
         # Definir o valor do atributo "type" com base nas coordenadas
         user_type = self._determine_user_type(latitude, longitude)
+        
+        # Converter gender para 'F' ou 'M'
+        gender = 'F' if user.gender == 'female' else 'M' if user.gender == 'male' else user.gender
     
         return {
             "type": user_type,
-            "gender": user.gender,
+            "gender": gender,
             "name": {
                 "title": user.title,
                 "first": user.first_name,
