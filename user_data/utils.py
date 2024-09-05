@@ -15,7 +15,8 @@ def read_csv(content):
     return list(csv_reader)
 
 def read_json(content):
-    return json.loads(content)
+    content_str = content.decode('utf-8')  # Decodificar bytes para string
+    return json.loads(content_str)         # Carregar JSON da string
 
 def transform_json_data(json_content):
     # Acesse a lista de resultados dentro do JSON

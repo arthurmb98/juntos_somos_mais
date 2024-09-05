@@ -38,8 +38,7 @@ class UserService:
             timezone_offset=user_data.get('location', {}).get('timezone', {}).get('offset', ''),
             timezone_description=user_data.get('location', {}).get('timezone', {}).get('description', ''),
             email=user_data.get('email', ''),
-            registered_date=parse_date(user_data.get('registered', {}).get('date', '')),
-            registered_age=user_data.get('registered', {}).get('age', 0),
+            registered=parse_date(user_data.get('registered', {}).get('date', '')),
             phone=user_data.get('telephoneNumbers', [])[0] if user_data.get('telephoneNumbers') else '',
             cell=user_data.get('mobileNumbers', [])[0] if user_data.get('mobileNumbers') else '',
             picture_large=user_data.get('picture', {}).get('large', ''),
@@ -74,8 +73,8 @@ class UserService:
                 }
             },
             "email": user.email,
-            "birthday": user.dob_date.isoformat() if user.dob_date else '',
-            "registered": user.registered_date.isoformat() if user.registered_date else '',
+            "birthday": user.birthday.isoformat() if user.birthday else '',
+            "registered": user.registered.isoformat() if user.registered else '',
             "telephoneNumbers": [user.phone],
             "mobileNumbers": [user.cell],
             "picture": {
