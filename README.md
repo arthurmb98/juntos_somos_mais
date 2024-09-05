@@ -29,7 +29,7 @@ Cria um novo usuário. O corpo da solicitação deve conter os dados do usuário
 
 ### `POST /api/populate_database/`
 
-Popula o banco de dados a partir dos arquivos CSV e JSON.
+Popula o banco de dados a partir dos arquivos CSV e JSON estáticos.
 
 ### `POST /api/populate_csv/`
 
