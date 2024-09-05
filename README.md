@@ -10,6 +10,10 @@ API para carregar, transformar e consultar dados de usuários a partir de arquiv
 
 Verifica se a aplicação está funcionando.
 
+### `GET /swagger/`
+
+Seagger da aplicação.
+
 ### `GET /api/users/`
 
 Lista os usuários com paginação. Parâmetros:
