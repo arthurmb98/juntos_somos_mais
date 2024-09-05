@@ -2,9 +2,10 @@ import csv
 from datetime import datetime
 from io import StringIO
 import json
-from typing import List, Dict, Any
+from typing import Dict, Any
 from django.core.files.base import ContentFile
 from .models import User
+from django.core.paginator import Paginator
 
 class UserService:
     def __init__(self):
@@ -15,9 +16,24 @@ class UserService:
         User.objects.all().delete()
         return {'status': 'success', 'message': 'All users have been deleted'}
 
-    def get_all_users(self) -> List[Dict[str, Any]]:
+    def get_all_users(self, page_number: int = 1, page_size: int = 10) -> Dict[str, Any]:
         users = User.objects.all()
-        return [self._convert_user_to_dict(user) for user in users]
+        
+        # Cria um paginador com a lista de usuários e o tamanho da página
+        paginator = Paginator(users, page_size)
+        
+        # Obtém a página solicitada
+        page = paginator.get_page(page_number)
+        
+        # Converte os usuários da página para dicionários
+        user_list = [self._convert_user_to_dict(user) for user in page.object_list]
+        
+        return {
+            "pageNumber": page.number,
+            "pageSize": page.paginator.per_page,
+            "totalCount": page.paginator.count,
+            "users": user_list
+        }
 
     def create_user(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         def parse_date(date_str: str) -> datetime:
