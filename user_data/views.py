@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from user_data.load_data import populate_database
+from user_data.load_data import populate_json, populate_csv
 from user_data.services import UserService
 from rest_framework.decorators import api_view
 import json
@@ -28,7 +28,28 @@ def create_user(request):
 def populate_database_view(request):
     if request.method == 'POST':
         try:
-            populate_database()
+            populate_json()
+            populate_csv()
+            return Response({'status': 'success', 'message': 'Database populated successfully'}, status=200)
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=500)
+    return Response({'status': 'error', 'message': 'POST request required'}, status=400)
+
+@api_view(['POST'])
+def populate_csv_view(request):
+    if request.method == 'POST':
+        try:
+            populate_csv()
+            return Response({'status': 'success', 'message': 'Database populated successfully'}, status=200)
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=500)
+    return Response({'status': 'error', 'message': 'POST request required'}, status=400)
+
+@api_view(['POST'])
+def populate_json_view(request):
+    if request.method == 'POST':
+        try:
+            populate_json()
             return Response({'status': 'success', 'message': 'Database populated successfully'}, status=200)
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=500)

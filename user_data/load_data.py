@@ -1,17 +1,6 @@
-import pytz
-from datetime import datetime
-from user_data.models import User
-from user_data.utils import download_file, transform_json_data, read_csv, read_json, transform_csv_data
 
-def parse_datetime(date_str: str) -> datetime:
-    if date_str:
-        try:
-            naive_datetime = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')  # Ajuste o formato conforme o seu JSON
-            return pytz.utc.localize(naive_datetime)  # Adiciona fuso horário UTC
-        except (ValueError, TypeError):
-            print(f"Date parsing error for value: {date_str}")  # Linha de depuração
-            return None
-    return None
+from user_data.models import User
+from user_data.utils import *
 
 def insert_users(data):
     for user in data:
@@ -31,31 +20,38 @@ def insert_users(data):
             email=user['email'],
             birthday=parse_datetime(user['birthday']),
             registered=parse_datetime(user['registered']),
-            phone=user['telephoneNumbers'][0],
-            cell=user['mobileNumbers'][0],
+            phone=format_phone_number(user['telephoneNumbers'][0]),
+            cell=format_phone_number(user['mobileNumbers'][0]),
             picture_large=user['picture']['large'],
             picture_medium=user['picture']['medium'],
             picture_thumbnail=user['picture']['thumbnail']
         )
         db_user.save()  # Salvar o usuário no banco de dados
 
-
-def populate_database():
+        
+def populate_csv():
     csv_url = 'https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv'
+   
+    try:
+        csv_content = download_file(csv_url)
+        
+        csv_data = read_csv(csv_content)
+        
+        transformed_csv_data = transform_csv_data(csv_data)
+        
+        insert_users(transformed_csv_data)
+    
+    except Exception as e:
+        print(f"An error occurred inserting CSV: {e}")
+                
+def populate_json():
     json_url = 'https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json'
     
     try:
-        csv_content = download_file(csv_url)
         json_content = download_file(json_url)
-        
-        csv_data = read_csv(csv_content)
         json_data = read_json(json_content)
-        
-        transformed_csv_data = transform_csv_data(csv_data)
         transformed_json_data = transform_json_data(json_data)
-        
-        insert_users(transformed_csv_data)
         insert_users(transformed_json_data)
     
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred inserting JSON: {e}")

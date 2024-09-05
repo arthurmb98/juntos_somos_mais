@@ -2,7 +2,25 @@ import csv
 import json
 import requests
 from io import StringIO
-import pandas as pd
+import pytz
+import re
+from datetime import datetime
+
+def parse_datetime(date_str: str) -> datetime:
+    if date_str:
+        try:
+            naive_datetime = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')  # Ajuste o formato conforme o seu JSON
+            return pytz.utc.localize(naive_datetime)  # Adiciona fuso horário UTC
+        except (ValueError, TypeError):
+            print(f"Date parsing error for value: {date_str}")  # Linha de depuração
+            return None
+    return None
+
+def format_phone_number(phone_number: str) -> str:
+    # Remove todos os caracteres não numéricos
+    digits = re.sub(r'\D', '', phone_number)
+    
+    return f'+55{digits}'
 
 def download_file(url):
     try:
