@@ -43,7 +43,7 @@ Popula o banco de dados a partir do arquivo JSON estático.
 
 Expurga todos os dados de usuários.
 
-### `POST /api/users/create`
+### `POST /api/users/create/`
 
 Popula o banco de dados a partir de um arquivo CSV ou JSON no 'body' do request.
 
