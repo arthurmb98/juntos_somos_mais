@@ -23,6 +23,25 @@ def get_users(request):
     # Retorna a resposta JSON com os dados paginados
     return Response(paginated_users)
 
+@api_view(['GET'])
+def get_users_by_type(request):
+    user_service = UserService()
+    
+    # Captura o parâmetro 'type' da query string
+    user_type = request.query_params.get('type', None)
+    if not user_type:
+        return Response({'error': 'User type is required'}, status=400)
+
+    # Captura os parâmetros de página e tamanho da página da query string
+    page_number = int(request.query_params.get('page', 1))  # Default é página 1
+    page_size = int(request.query_params.get('page_size', 10))  # Default é 10 itens por página
+    
+    # Chama o serviço para obter os usuários filtrados por tipo
+    filtered_users = user_service.get_users_by_type(user_type=user_type, page_number=page_number, page_size=page_size)
+    
+    # Retorna a resposta JSON com os dados filtrados e paginados
+    return Response(filtered_users)
+
 @api_view(['POST'])
 def create_user(request):
     try:

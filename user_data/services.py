@@ -1,9 +1,5 @@
-import csv
 from datetime import datetime
-from io import StringIO
-import json
-from typing import Dict, Any
-from django.core.files.base import ContentFile
+from typing import Dict, Any, List
 from .models import User
 from django.core.paginator import Paginator
 
@@ -35,6 +31,31 @@ class UserService:
             "users": user_list
         }
 
+    def get_users_by_type(self, user_type: str, page_number: int = 1, page_size: int = 10) -> Dict[str, Any]:
+        users = User.objects.all()  # Obtém todos os usuários do banco de dados
+
+        # Filtrar usuários dinamicamente com base no "type"
+        filtered_users: List[User] = []
+        for user in users:
+            calculated_type = self._determine_user_type(float(user.latitude), float(user.longitude))
+            if calculated_type == user_type:
+                filtered_users.append(user)
+
+        # Paginação dos usuários filtrados
+        paginator = Paginator(filtered_users, page_size)
+        page = paginator.get_page(page_number)
+
+        # Converte os usuários da página para dicionários
+        user_list = [self._convert_user_to_dict(user) for user in page.object_list]
+
+        return {
+            "pageNumber": page.number,
+            "pageSize": page.paginator.per_page,
+            "totalCount": page.paginator.count,
+            "users": user_list
+        }
+        
+        
     def create_user(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         def parse_date(date_str: str) -> datetime:
             if date_str:
@@ -70,8 +91,14 @@ class UserService:
         return self._convert_user_to_dict(db_user)
 
     def _convert_user_to_dict(self, user: User) -> Dict[str, Any]:
+        # Obter as coordenadas do usuário
+        latitude = float(user.latitude) if user.latitude else None
+        longitude = float(user.longitude) if user.longitude else None
+        # Definir o valor do atributo "type" com base nas coordenadas
+        user_type = self._determine_user_type(latitude, longitude)
+    
         return {
-            "type": "laborious",
+            "type": user_type,
             "gender": user.gender,
             "name": {
                 "title": user.title,
@@ -106,50 +133,33 @@ class UserService:
             "nationality": "BR"  # Atualize se necessário
         }
 
-    def import_csv(self, csv_file: ContentFile):
-        csv_data = csv_file.read().decode('utf-8')
-        reader = csv.DictReader(StringIO(csv_data))
-        for row in reader:
-            user_data = self._parse_csv_row(row)
-            self.create_user(user_data)
+    def _determine_user_type(self, latitude: float, longitude: float) -> str:
+        if latitude is None or longitude is None:
+            return "laborious"  # Retorno padrão se não houver coordenadas
 
-    def import_json(self, json_file: ContentFile):
-        json_data = json_file.read().decode('utf-8')
-        data = json.loads(json_data).get('results', [])
-        for user_data in data:
-            self.create_user(user_data)
+        # Definir limites para "special"
+        special_regions = [
+            {
+            "minlon": -2.196998, "minlat": -46.361899, "maxlon": -15.411580, "maxlat": -34.276938
+            },
+            {
+            "minlon": -19.766959, "minlat": -52.997614, "maxlon": -23.966413, "maxlat": -44.428305
+            }
+        ]
 
-    def _parse_csv_row(self, row: Dict[str, str]) -> Dict[str, Any]:
-        return {
-            "gender": row.get('gender', ''),
-            "name": {
-                "title": row.get('name.title', ''),
-                "first": row.get('name.first', ''),
-                "last": row.get('name.last', '')
-            },
-            "location": {
-                "street": row.get('location.street', ''),
-                "city": row.get('location.city', ''),
-                "state": row.get('location.state', ''),
-                "postcode": int(row.get('location.postcode', 0)),
-                "coordinates": {
-                    "latitude": row.get('location.coordinates.latitude', ''),
-                    "longitude": row.get('location.coordinates.longitude', '')
-                },
-                "timezone": {
-                    "offset": row.get('location.timezone.offset', ''),
-                    "description": row.get('location.timezone.description', '')
-                }
-            },
-            "email": row.get('email', ''),
-            "birthday": row.get('dob.date', ''),
-            "registered": row.get('registered.date', ''),
-            "telephoneNumbers": [row.get('phone', '')],
-            "mobileNumbers": [row.get('cell', '')],
-            "picture": {
-                "large": row.get('picture.large', ''),
-                "medium": row.get('picture.medium', ''),
-                "thumbnail": row.get('picture.thumbnail', '')
-            },
-            "nationality": "BR"  # Atualize se necessário
+        # Verificar se está em uma região "special"
+        for region in special_regions:
+            if region["minlon"] <= longitude <= region["maxlon"] and region["minlat"] <= latitude <= region["maxlat"]:
+                return "special"
+
+        # Definir limites para "normal"
+        normal_region = {
+            "minlon": -34.016466, "minlat": -54.777426, "maxlon": -26.155681, "maxlat": -46.603598
         }
+
+        # Verificar se está em uma região "normal"
+        if normal_region["minlon"] <= longitude <= normal_region["maxlon"] and normal_region["minlat"] <= latitude <= normal_region["maxlat"]:
+            return "normal"
+
+        # Se não estiver em nenhuma região especial ou normal, retorna "laborious"
+        return "laborious"
