@@ -5,14 +5,35 @@ from io import StringIO
 import pandas as pd
 
 def download_file(url):
-    response = requests.get(url)
-    response.raise_for_status()
-    return response.content
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.content
+    except requests.RequestException as e:
+        print(f"Error downloading file from {url}: {e}")
+        raise
 
 def read_csv(content):
-    content_str = content.decode('utf-8')
-    csv_reader = csv.DictReader(StringIO(content_str))
-    return list(csv_reader)
+    print("Tipo de conteúdo:", type(content))
+    print("Conteúdo:", content)
+    
+    if isinstance(content, bytes):
+        # Decodifica o conteúdo binário para uma string, removendo o BOM se presente
+        content_str = content.decode('utf-8-sig')
+        
+        # Usa StringIO para tratar a string como um arquivo
+        csv_file = StringIO(content_str)
+        
+        # Cria um leitor de CSV
+        csv_reader = csv.DictReader(csv_file)
+        
+        # Converte o leitor em uma lista de dicionários
+        data = list(csv_reader)
+        
+        return data
+    else:
+        raise ValueError("Expected content to be bytes, got {0}".format(type(content)))
+
 
 def read_json(content):
     content_str = content.decode('utf-8')  # Decodificar bytes para string
@@ -68,6 +89,46 @@ def transform_json_data(json_content):
     
     return transformed_data
 
+def transform_csv_data(csv_data):
+    transformed_data = []
+
+    for row in csv_data:
+        transformed_item = {
+            "gender": row.get('gender', '').strip().lower(),
+            "name": {
+                "title": row.get('name__title', '').strip(),
+                "first": row.get('name__first', '').strip(),
+                "last": row.get('name__last', '').strip()
+            },
+            "location": {
+                "street": row.get('location__street', '').strip(),
+                "city": row.get('location__city', '').strip(),
+                "state": row.get('location__state', '').strip(),
+                "postcode": row.get('location__postcode', ''),
+                "coordinates": {
+                    "latitude": str(row.get('location__coordinates__latitude', '')).strip(),
+                    "longitude": str(row.get('location__coordinates__longitude', '')).strip()
+                },
+                "timezone": {
+                    "offset": row.get('location__timezone__offset', '').strip(),
+                    "description": row.get('location__timezone__description', '').strip()
+                }
+            },
+            "email": row.get('email', '').strip(),
+            "birthday": row.get('dob__date', '').strip(),
+            "registered": row.get('registered__date', '').strip(),
+            "telephoneNumbers": [row.get('phone', '').strip()],
+            "mobileNumbers": [row.get('cell', '').strip()],
+            "picture": {
+                "large": row.get('picture__large', '').strip(),
+                "medium": row.get('picture__medium', '').strip(),
+                "thumbnail": row.get('picture__thumbnail', '').strip()
+            },
+            "nationality": "BR"
+        }
+        transformed_data.append(transformed_item)
+    
+    return transformed_data
 
 
 

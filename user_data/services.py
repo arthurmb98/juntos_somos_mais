@@ -9,6 +9,11 @@ from .models import User
 class UserService:
     def __init__(self):
         pass  # No need for a database session in Django, it uses Django ORM directly
+    
+    def purge_users(self):
+        # Deleta todos os usuários do banco de dados
+        User.objects.all().delete()
+        return {'status': 'success', 'message': 'All users have been deleted'}
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         users = User.objects.all()

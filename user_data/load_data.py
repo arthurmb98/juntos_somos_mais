@@ -1,7 +1,7 @@
 import pytz
 from datetime import datetime
 from user_data.models import User
-from user_data.utils import download_file, transform_json_data, read_csv, read_json
+from user_data.utils import download_file, transform_json_data, read_csv, read_json, transform_csv_data
 
 def parse_datetime(date_str: str) -> datetime:
     if date_str:
@@ -41,17 +41,21 @@ def insert_users(data):
 
 
 def populate_database():
-    # URLs dos arquivos CSV e JSON
     csv_url = 'https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv'
     json_url = 'https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json'
     
-    # Baixar e ler os dados
-    #csv_data = read_csv(download_file(csv_url))
-    json_data = read_json(download_file(json_url))
+    try:
+        csv_content = download_file(csv_url)
+        json_content = download_file(json_url)
+        
+        csv_data = read_csv(csv_content)
+        json_data = read_json(json_content)
+        
+        transformed_csv_data = transform_csv_data(csv_data)
+        transformed_json_data = transform_json_data(json_data)
+        
+        insert_users(transformed_csv_data)
+        insert_users(transformed_json_data)
     
-    # Transformar os dados
-    #transformed_csv_data = transform_csv_data(csv_data)
-    transformed_json_data = transform_json_data(json_data)
-    
-    # Inserir os dados no banco de dados
-    insert_users(transformed_json_data)
+    except Exception as e:
+        print(f"An error occurred: {e}")

@@ -1,4 +1,4 @@
-from requests import Response
+from rest_framework.response import Response
 from user_data.load_data import populate_database
 from user_data.services import UserService
 from rest_framework.decorators import api_view
@@ -33,3 +33,13 @@ def populate_database_view(request):
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=500)
     return Response({'status': 'error', 'message': 'POST request required'}, status=400)
+
+@api_view(['GET'])
+def purge_users_view(request):
+    try:
+        # Expurga todos os dados (ou utilize outra lógica para definir quais dados expurgar)
+        user_service = UserService()
+        response = user_service.purge_users()  # Ou user_service.purge_old_users(date_threshold)
+        return Response(response, status=200)
+    except Exception as e:
+        return Response({'status': 'error', 'message': str(e)}, status=500)
