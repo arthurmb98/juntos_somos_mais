@@ -1,5 +1,7 @@
 from datetime import datetime
 from typing import Dict, Any, List
+
+from user_data.utils import format_phone_number, parse_datetime
 from .models import User
 from django.core.paginator import Paginator
 
@@ -53,42 +55,7 @@ class UserService:
             "pageSize": page.paginator.per_page,
             "totalCount": page.paginator.count,
             "users": user_list
-        }
-        
-        
-    def create_user(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
-        def parse_date(date_str: str) -> datetime:
-            if date_str:
-                try:
-                    return datetime.strptime(date_str, '%Y-%m-%d').date()
-                except (ValueError, TypeError):
-                    print(f"Date parsing error for value: {date_str}")  # Debugging line
-                    return None
-            return None
-
-        db_user = User(
-            gender=user_data.get('gender', ''),
-            title=user_data.get('name', {}).get('title', ''),
-            first_name=user_data.get('name', {}).get('first', ''),
-            last_name=user_data.get('name', {}).get('last', ''),
-            street=user_data.get('location', {}).get('street', ''),
-            city=user_data.get('location', {}).get('city', ''),
-            state=user_data.get('location', {}).get('state', ''),
-            postcode=user_data.get('location', {}).get('postcode', 0),
-            latitude=user_data.get('location', {}).get('coordinates', {}).get('latitude', ''),
-            longitude=user_data.get('location', {}).get('coordinates', {}).get('longitude', ''),
-            timezone_offset=user_data.get('location', {}).get('timezone', {}).get('offset', ''),
-            timezone_description=user_data.get('location', {}).get('timezone', {}).get('description', ''),
-            email=user_data.get('email', ''),
-            registered=parse_date(user_data.get('registered', {}).get('date', '')),
-            phone=user_data.get('telephoneNumbers', [])[0] if user_data.get('telephoneNumbers') else '',
-            cell=user_data.get('mobileNumbers', [])[0] if user_data.get('mobileNumbers') else '',
-            picture_large=user_data.get('picture', {}).get('large', ''),
-            picture_medium=user_data.get('picture', {}).get('medium', ''),
-            picture_thumbnail=user_data.get('picture', {}).get('thumbnail', '')
-        )
-        db_user.save()
-        return self._convert_user_to_dict(db_user)
+        }    
 
     def _convert_user_to_dict(self, user: User) -> Dict[str, Any]:
         # Obter as coordenadas do usuário
