@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+populate_database()
+
 @csrf_exempt  # Use com cuidado, apenas para desenvolvimento ou se você não tiver CSRF configurado
 def health_check(request):
     return JsonResponse({'status': 'ok'}, status=200)

@@ -1,18 +1,13 @@
-import os
-import django
+import pytz
 from datetime import datetime
 
-# Configuração do Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'juntos_somos_mais.settings')
-django.setup()
-
 from user_data.models import User
-from user_data.utils import download_file, read_csv, read_json, transform_json_data
 
 def parse_datetime(date_str: str) -> datetime:
     if date_str:
         try:
-            return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')  # Ajuste o formato conforme o seu JSON
+            naive_datetime = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')  # Ajuste o formato conforme o seu JSON
+            return pytz.utc.localize(naive_datetime)  # Adiciona fuso horário UTC
         except (ValueError, TypeError):
             print(f"Date parsing error for value: {date_str}")  # Linha de depuração
             return None
@@ -43,19 +38,3 @@ def insert_users(data):
             picture_thumbnail=user['picture']['thumbnail']
         )
         db_user.save()  # Salvar o usuário no banco de dados
-
-def populate_database():
-    # URLs dos arquivos CSV e JSON
-    csv_url = 'https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv'
-    json_url = 'https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json'
-    
-    # Baixar e ler os dados
-    csv_data = read_csv(download_file(csv_url))
-    json_data = read_json(download_file(json_url))
-    
-    # Transformar os dados
-    #transformed_csv_data = transform_csv_data(csv_data)
-    transformed_json_data = transform_json_data(json_data)
-    
-    # Inserir os dados no banco de dados
-    insert_users(transformed_json_data)
