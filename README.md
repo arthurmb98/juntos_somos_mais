@@ -12,7 +12,7 @@ Verifica se a aplicação está funcionando.
 
 ### `GET /swagger/`
 
-Seagger da aplicação.
+Swagger da aplicação.
 
 ### `GET /api/users/`
 
