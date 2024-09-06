@@ -27,7 +27,7 @@ Lista os usuários filtrados por tipo com paginação. Parâmetros:
 - `page`: Número da página (default: 1)
 - `page_size`: Tamanho da página (default: 10)
 
-### `POST /api/users/create`
+### `POST /api/users/create/`
 
 Cria novos usuários. O corpo da solicitação deve conter o link do arquivo JSON ou CSV.
 - `body`: { "file_url": "https://url/file.json" } (obrigatório)
